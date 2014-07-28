@@ -83,6 +83,9 @@ io.on('connection', function(socket){
         }
     }
   });
+   socket.on('GameOver', function(){
+    socket.emit('alertgo');
+   });
 });
 
 
