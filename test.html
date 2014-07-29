@@ -78,11 +78,25 @@
       {
       if(t == 0 && socket.user == p1)
       {
-      socket.emit('divclicked', num, t, p1, p2);
+        if(painted[num-1] == true)
+          {
+            alert("space already occupied");
+          }
+          else
+          {
+            socket.emit('divclicked', num, t, p1, p2);            
+          }
       }
       else if(t == 1 && socket.user == p2)
       {
-        socket.emit('divclicked', num, t, p1, p2);
+        if(painted[num-1] == true)
+          {
+            alert("space already occupied");
+          }
+          else
+          {
+            socket.emit('divclicked', num, t, p1, p2);            
+          }
       }
       else
         alert("Its not your turn");
@@ -151,7 +165,7 @@
       }
       else
       {
-        alert("Space already occupied");
+        // alert("Space already occupied");
       }
       painted[num-1] = true;
       console.log(painted[num-1]);
@@ -218,6 +232,10 @@
           }
         }
       }
+      function link()
+      {
+        location.reload();
+      }
  	</script>
  	<ul id="messages"></ul>
     	<form id = "kk" action="">
@@ -240,5 +258,6 @@
     <span class="result"><h3 id="winnerorloser" align="center"></h3>
     </span>
     <h3 id="seee">Click on the username to challenge with them</h3>
+    <a onclick = "link()" href = "">Click to Refresh</a>
  </body>
  </html>

@@ -20,7 +20,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 var details={};
 io.on('connection', function(socket){
+  console.log("a user connected");
   console.log(socket.id);
+  // console.log(socket.id);
   // socket.to(socket.id).emit('check');
   socket.on('client detail', function(msg){
   	users[msg] ={
@@ -39,6 +41,7 @@ io.on('connection', function(socket){
    socket.on('call client',function(name){
     room = name.op + name.cu ;
     console.log(room);
+    // console.log(details);
    	socket.to(details[name.op]).emit('to socket', name.cu);
    	socket.join(room);
    });
@@ -74,14 +77,19 @@ io.on('connection', function(socket){
     io.in(room).emit('reload');
    });
    socket.on('disconnect', function(){
-    for (var ke in details)
-    {
-      if (details[ke] == socket.id) 
-        {
-          io.emit('update', ke);
-          delete details[ke];
-        }
-    }
+    // setTimeout(function () 
+    // {
+      // console.log("a user disconnected");
+      for (var ke in details)
+      {
+        if (details[ke] == socket.id) 
+          {
+            io.emit('update', ke);
+            delete details[ke];
+          }
+      }
+    // }, 10000);
+    
   });
    socket.on('GameOver', function(){
     socket.emit('alertgo');
