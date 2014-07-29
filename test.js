@@ -19,6 +19,7 @@ var path = require('path');
 app.use(express.static(path.join(__dirname, 'public')));
 
 var details={};
+var users = {};
 io.on('connection', function(socket){
   console.log("a user connected");
   console.log(socket.id);
@@ -28,26 +29,36 @@ io.on('connection', function(socket){
   	users[msg] ={
   		id: socket.id,
   		connected: false
-  	}
+  	};
   	details[msg] = socket.id;
-    socket.emit('checkforothers', details);
+    console.log(users);
+    socket.emit('checkforothers', details, users);
     // io.emit('check');
   	// console.log(socket.id);
   });
    socket.on('display', function(){
-  	console.log(details);
+  	// console.log(details);
   	io.emit('lista',details,users);
   });
    socket.on('call client',function(name){
     room = name.op + name.cu ;
     console.log(room);
+    // console.log(users);
+    // console.log(name.cu);
     // console.log(details);
+    // console.log([details[name.cu]]);
+    // // temp = details[name.cu];
+    console.log(users[name.cu].connected);
+    users[name.cu].connected = true;
    	socket.to(details[name.op]).emit('to socket', name.cu);
    	socket.join(room);
    });
    socket.on('accepted',function(name){
     room = name.cu + name.op ;
     console.log(room);
+    users[name.cu].connected = true;
+    console.log(users[name.cu].connected);
+    console.log(users[name.op].connected);
    	socket.to(details[name.op]).emit('confirm',name.cu,name.op);
    	socket.join(room);
    });

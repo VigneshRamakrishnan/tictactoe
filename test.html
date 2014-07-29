@@ -195,8 +195,9 @@
       if(document.getElementById(k) != null)
         document.getElementById(k).remove();
     });
-    socket.on('checkforothers', function(details){
+    socket.on('checkforothers', function(details, users){
       console.log(details);
+      console.log(users);
       for (var ke in details)
       {
       if(document.getElementById(ke) == null && ke != document.getElementById("m").value)
@@ -208,6 +209,10 @@
             Btn.setAttribute("id",ke);
             Btn.setAttribute("onclick","OnQuery(event)");
             document.body.appendChild(Btn);   
+        }
+      if ( users[ke].connected == true) 
+        {
+          Btn.disabled = true;
         }
       }
     });
