@@ -73,26 +73,22 @@
   		}
   		if(bool == true)
       {
-        // var entry = document.createElement('li');
-        // entry.appendChild(searchBtn);     
-        // list.appendChild(entry);
-        // document.body.appendChild(list);
         document.body.appendChild(searchBtn);
+        temp = users[socket.user].connected;
+        if (temp == true)
+        {
+          document.getElementById(searchBtn.id).disabled = true;
+        }
       }
   	});
   	function OnQuery(e)
   	{
-      // alert("query");
-      // alert(e.target.value);
-      // alert(socket.user);
   		socket.emit('call client',{ op:e.target.value , cu: socket.user });
   	}
     function divClicked(num)
     {
       if(b == true)
       {
-        // alert(t);
-        // alert(socket.user);
       if(t == 0 && socket.user == p1)
       {
         if(painted[num-1] == true)
@@ -101,10 +97,6 @@
           }
           else
           {
-            // alert("herere");
-            // alert(num);
-            // alert(p1);
-            // alert(p2);
             socket.emit('divclicked', num, t, p1, p2);            
           }
       }
@@ -149,12 +141,13 @@
       if(document.getElementById(b) != null)      
       document.getElementById(b).disabled= document.getElementById(b) || true;
     });
-    socket.on('play',function(){
+    socket.on('play',function(details){
     document.getElementById('game').style.visibility="visible";
-    
-    // document.getElementById('see').style.visibility="hidden";
-    // document.getElementById('m').style.visibility="hidden";
-    // document.getElementById('mm').style.visibility="hidden";
+    for (var ke in details)
+      {
+        if (document.getElementById(ke) != null)
+          document.getElementById(ke).style.visibility = "hidden";
+      }
     document.getElementById('seee').style.visibility="hidden";
     if(socket.user == p1)
     {
@@ -168,32 +161,25 @@
     document.getElementById('opponent').style.visibility="visible";
     });
     socket.on('divputsymbol', function(num, s){
-      // alert("akjsbdkjdas");
       t = s;
-      // alert(b);
       if(b == true)
       {
         if(painted[num-1] ==false)
       {
         if(turn % 2 == 0)
         {
-          // alert("ajsdn")
           document.getElementById("div"+ num).innerText = "X";
           content[num-1] = 'X';
         }
         else
         {
-          // alert("aslkd");
           document.getElementById("div"+ num).innerText = "O";
           content[num-1] = 'O';
         }
         turn += 1;
       }
       else
-      {
-        // alert("aaaa");
-        // alert("Space already occupied");
-      }
+      {}     
       painted[num-1] = true;
       console.log(painted[num-1]);
       checkForWinners(content[num-1]);
@@ -204,13 +190,11 @@
 
     });
     socket.on('win',function(){
-      // document.getElementById('winnerorloser').innerHTML= socket.user + " " + "Has won";
       document.getElementById('winnerorloser').innerHTML= "You Have won";
       document.getElementById('winnerorloser').style.visibility="visible";
       b = false; 
     });
-    socket.on('lose',function(){
-      // alert("you lost");
+    socket.on('lose',function(){;
       document.getElementById('winnerorloser').innerHTML= "You Have lost :(";
       document.getElementById('winnerorloser').style.visibility="visible";
       b = false; 
@@ -246,13 +230,39 @@
     socket.on('alertgo', function(){
       alert("Game Over!");
     });
-    socket.on("updatebuttons", function(users, uname){
-        if (users.connected == false )
+    socket.on("updatebuttons", function(users, uname, details){
+      // console.log(uname);
+      // console.log(document.getElementById(uname).disabled);
+      // alert("aisb");
+      for (var k in details)
+      {
+        if (users[k].connected == false && k != socket.user)
+          document.getElementById(k).disabled = false;
+      }
+      // console.log(users);
+        if (users[socket.user].connected == false )
         {
-            if (document.getElementById(uname) != null && document.getElementById(uname).disabled == true)
-              document.getElementById(uname).disabled = false;
+          // alert("hey");
+          // alert(uname);
+            // if (document.getElementById(uname) != null && document.getElementById(uname).disabled == true)
+            //   document.getElementById(uname).disabled = false;
+            
+            document.getElementById('seee').style.visibility="visible";
+          for (var ke in details)
+          {
+            if (document.getElementById(ke) != null)
+            document.getElementById(ke).style.visibility = "visible";
+          }
         } 
-        document.getElementById('seee').style.visibility="visible";
+        // document.getElementById('seee').style.visibility="visible";
+        // for (var ke in details)
+        // {
+        //   if (document.getElementById(ke) != null)
+        //   document.getElementById(ke).style.visibility = "visible";
+        // }
+    });
+    socket.on('sample', function(){
+      alert("hi");
     });
      function checkForWinners(symbol)
       {

@@ -12,7 +12,7 @@ var users =
     	id: "",
     	connected: false
 }
-
+var temp;
 var room = "abc";
 var room1 = " ";
 var path = require('path');
@@ -61,7 +61,7 @@ io.on('connection', function(socket){
     io.emit('disable', a, b);
     // var clients = io.sockets.adapter.rooms['abc'];
     // console.log(clients);
-    io.in(room).emit('play');
+    io.in(room).emit('play', details);
    });
    socket.on('divclicked', function(num, t, p1, p2){
       if( t == 0)
@@ -86,9 +86,6 @@ io.on('connection', function(socket){
     io.in(room).emit('reload');
    });
    socket.on('disconnect', function(){
-    // setTimeout(function () 
-    // {
-      // console.log("a user disconnected");
       for (var ke in details)
       {
         if (details[ke] == socket.id) 
@@ -96,16 +93,34 @@ io.on('connection', function(socket){
             io.emit('update', ke);
             delete details[ke];
           }
-      }
-    // }, 10000);
-    
+      } 
   });
    socket.on('GameOver', function(){
     socket.emit('alertgo');
    });
    socket.on('updateuser', function(theuser){
     users[theuser].connected = false;
-    io.emit("updatebuttons", users[theuser], theuser);
+    console.log("test");
+    console.log(details);
+    io.emit("updatebuttons", users, theuser, details);
+    // var clients = io.sockets.adapter.rooms[room];
+    // for (var k in clients)
+    //   {
+    //       if (k != socket.id)
+    //         temp = k;
+    //   }
+    //   console.log(temp);
+    // for (var ke in details)
+    //   {
+    //       if(details[ke] != temp)
+    //       {
+    //         console.log(ke);
+    //         console.log(details[ke]);
+    //         socket.to(details[ke]).emit("updatebuttons", users[theuser], theuser, details);
+    //         socket.to(details[ke]).emit("sample");
+    //       }
+    //   }
+      // console.log(k);
    });
 });
 
