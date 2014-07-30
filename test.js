@@ -43,11 +43,6 @@ io.on('connection', function(socket){
    socket.on('call client',function(name){
     room = name.op + name.cu ;
     console.log(room);
-    // console.log(users);
-    // console.log(name.cu);
-    // console.log(details);
-    // console.log([details[name.cu]]);
-    // // temp = details[name.cu];
     console.log(users[name.cu].connected);
     users[name.cu].connected = true;
    	socket.to(details[name.op]).emit('to socket', name.cu);
@@ -57,8 +52,8 @@ io.on('connection', function(socket){
     room = name.cu + name.op ;
     console.log(room);
     users[name.cu].connected = true;
-    console.log(users[name.cu].connected);
-    console.log(users[name.op].connected);
+    // console.log(users[name.cu].connected);
+    // console.log(users[name.op].connected);
    	socket.to(details[name.op]).emit('confirm',name.cu,name.op);
    	socket.join(room);
    });
@@ -78,6 +73,9 @@ io.on('connection', function(socket){
       console.log(p1);
       room = p2 + p1;
       console.log(room);
+      console.log("hererereasod");
+      var clients = io.sockets.adapter.rooms[room];
+      console.log(clients);
       io.in(room).emit('divputsymbol', num, t);
    });
    socket.on('won', function(winner, loser){
@@ -104,6 +102,10 @@ io.on('connection', function(socket){
   });
    socket.on('GameOver', function(){
     socket.emit('alertgo');
+   });
+   socket.on('updateuser', function(theuser){
+    users[theuser].connected = false;
+    io.emit("updatebuttons", users[theuser], theuser);
    });
 });
 

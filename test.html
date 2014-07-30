@@ -27,6 +27,8 @@
     var b = true;
     function init()
     {
+      var list = document.getElementById('demo');
+      // var str = '<ul>';
       painted = new Array();
       content = new Array();
       winningCombinations = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]; 
@@ -48,6 +50,10 @@
   	{
   		e.preventDefault();
   		socket.user = document.getElementById('m').value;
+      document.getElementById('playerwho').innerHTML = "You are" + " " + socket.user;
+      document.getElementById('see').remove();
+      document.getElementById('m').remove();
+      document.getElementById('mm').remove();
   		socket.emit('client detail', socket.user);
   		socket.emit('display');
   	}
@@ -60,22 +66,33 @@
   			searchBtn.setAttribute("value",key);
         searchBtn.setAttribute("id",key);
   			searchBtn.setAttribute("onclick","OnQuery(event)");
-  			if(key != document.getElementById("m").value && users[key].connected == false )
+  			if(key != socket.user && users[key].connected == false )
   				bool = true;
   			else
   				bool = false;
   		}
   		if(bool == true)
-  			document.body.appendChild(searchBtn);		
+      {
+        // var entry = document.createElement('li');
+        // entry.appendChild(searchBtn);     
+        // list.appendChild(entry);
+        // document.body.appendChild(list);
+        document.body.appendChild(searchBtn);
+      }
   	});
   	function OnQuery(e)
   	{
-  		socket.emit('call client',{ op:e.target.value , cu: document.getElementById("m").value });
+      // alert("query");
+      // alert(e.target.value);
+      // alert(socket.user);
+  		socket.emit('call client',{ op:e.target.value , cu: socket.user });
   	}
     function divClicked(num)
     {
       if(b == true)
       {
+        // alert(t);
+        // alert(socket.user);
       if(t == 0 && socket.user == p1)
       {
         if(painted[num-1] == true)
@@ -84,6 +101,10 @@
           }
           else
           {
+            // alert("herere");
+            // alert(num);
+            // alert(p1);
+            // alert(p2);
             socket.emit('divclicked', num, t, p1, p2);            
           }
       }
@@ -111,9 +132,9 @@
   		var c = confirm(name + "wants to challenge you");
   		if(c == true)
   		{
-  			socket.emit('accepted', {cu: document.getElementById("m").value, op: name});
+  			socket.emit('accepted', {cu: socket.user, op: name});
         p1 = name;
-        p2 = document.getElementById("m").value;
+        p2 = socket.user;
   		}
   	});
   	socket.on('confirm',function(name2,name1){
@@ -130,9 +151,10 @@
     });
     socket.on('play',function(){
     document.getElementById('game').style.visibility="visible";
-    document.getElementById('see').style.visibility="hidden";
-    document.getElementById('m').style.visibility="hidden";
-    document.getElementById('mm').style.visibility="hidden";
+    
+    // document.getElementById('see').style.visibility="hidden";
+    // document.getElementById('m').style.visibility="hidden";
+    // document.getElementById('mm').style.visibility="hidden";
     document.getElementById('seee').style.visibility="hidden";
     if(socket.user == p1)
     {
@@ -145,19 +167,23 @@
     document.getElementById('you').style.visibility="visible";
     document.getElementById('opponent').style.visibility="visible";
     });
-    socket.on('divputsymbol',function(num, s){
+    socket.on('divputsymbol', function(num, s){
+      // alert("akjsbdkjdas");
       t = s;
+      // alert(b);
       if(b == true)
       {
         if(painted[num-1] ==false)
       {
         if(turn % 2 == 0)
         {
+          // alert("ajsdn")
           document.getElementById("div"+ num).innerText = "X";
           content[num-1] = 'X';
         }
         else
         {
+          // alert("aslkd");
           document.getElementById("div"+ num).innerText = "O";
           content[num-1] = 'O';
         }
@@ -165,6 +191,7 @@
       }
       else
       {
+        // alert("aaaa");
         // alert("Space already occupied");
       }
       painted[num-1] = true;
@@ -200,7 +227,7 @@
       console.log(users);
       for (var ke in details)
       {
-      if(document.getElementById(ke) == null && ke != document.getElementById("m").value)
+      if(document.getElementById(ke) == null && ke != socket.user)
         {
             var Btn = document.createElement("input");
             Btn.setAttribute("type","button");
@@ -218,6 +245,14 @@
     });
     socket.on('alertgo', function(){
       alert("Game Over!");
+    });
+    socket.on("updatebuttons", function(users, uname){
+        if (users.connected == false )
+        {
+            if (document.getElementById(uname) != null && document.getElementById(uname).disabled == true)
+              document.getElementById(uname).disabled = false;
+        } 
+        document.getElementById('seee').style.visibility="visible";
     });
      function checkForWinners(symbol)
       {
@@ -241,10 +276,27 @@
       {
         location.reload();
       }
+      function back()
+      {
+        b = true;
+         for(var l = 0; l <= 8; l++)
+        {
+          painted[l] = false;
+          content[l]='';
+          document.getElementById("div"+ (l+1)).innerText = "";
+          document.getElementById("div"+ (l+1)).style.backgroundColor = "white";
+        }
+        document.getElementById('game').style.visibility="hidden";
+        document.getElementById('you').style.visibility="hidden";
+        document.getElementById('opponent').style.visibility="hidden";
+        document.getElementById('winnerorloser').style.visibility="hidden";
+        socket.emit('updateuser', socket.user);
+      }
  	</script>
  	<ul id="messages"></ul>
     	<form id = "kk" action="">
         <h1 align="center">Tic Tac Toe!</h1>
+        <center><label id ="playerwho"></label></center>
         <h2 id = "you" align="center">You are playing with <label id="opponent"></label></h2>
         <h3 id = "see">Enter your username to see other online users</h3>
     	<input id="m" autocomplete="off" /><button id ="mm">Enter</button>
@@ -262,7 +314,12 @@
     </div>
     <span class="result"><h3 id="winnerorloser" align="center"></h3>
     </span>
+    <a href = "javascript:link()"><center>Click to Disconnect</center></a>
+    <a href="javascript:back()"><center>Click to return Home</center></a>
     <h3 id="seee">Click on the username to challenge with them</h3>
-    <a onclick = "link()" href = "">Click to Refresh</a>
+    <!-- <div class="listda">
+      <span id = "aaa"></span>
+        <ol id="demo"></ol>
+     </div> -->
  </body>
  </html>
