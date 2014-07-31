@@ -52,8 +52,6 @@ io.on('connection', function(socket){
     room = name.cu + name.op ;
     console.log(room);
     users[name.cu].connected = true;
-    // console.log(users[name.cu].connected);
-    // console.log(users[name.op].connected);
    	socket.to(details[name.op]).emit('confirm',name.cu,name.op);
    	socket.join(room);
    });
@@ -73,7 +71,6 @@ io.on('connection', function(socket){
       console.log(p1);
       room = p2 + p1;
       console.log(room);
-      console.log("hererereasod");
       var clients = io.sockets.adapter.rooms[room];
       console.log(clients);
       io.in(room).emit('divputsymbol', num, t);
@@ -103,25 +100,9 @@ io.on('connection', function(socket){
     console.log("test");
     console.log(details);
     io.emit("updatebuttons", users, theuser, details);
-    // var clients = io.sockets.adapter.rooms[room];
-    // for (var k in clients)
-    //   {
-    //       if (k != socket.id)
-    //         temp = k;
-    //   }
-    //   console.log(temp);
-    // for (var ke in details)
-    //   {
-    //       if(details[ke] != temp)
-    //       {
-    //         console.log(ke);
-    //         console.log(details[ke]);
-    //         socket.to(details[ke]).emit("updatebuttons", users[theuser], theuser, details);
-    //         socket.to(details[ke]).emit("sample");
-    //       }
-    //   }
-      // console.log(k);
    });
+   // socket.on('specify', wt, usr)
+      // socket.emit("not yours");
 });
 
 

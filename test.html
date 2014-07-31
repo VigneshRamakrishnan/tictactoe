@@ -16,9 +16,8 @@
     var winningCombinations;
     var turn = 0;
     var t = 0;
-    var theDiv;
     var c;
-    var cxt;
+    var whoseturn = 0;
     var squaresFilled = 0;
     var w;
     var y;
@@ -28,7 +27,6 @@
     function init()
     {
       var list = document.getElementById('demo');
-      // var str = '<ul>';
       painted = new Array();
       content = new Array();
       winningCombinations = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]; 
@@ -46,6 +44,7 @@
     }
     var socket = io();
     socket.user = "";
+
   	function functioni(e)
   	{
   		e.preventDefault();
@@ -57,6 +56,81 @@
   		socket.emit('client detail', socket.user);
   		socket.emit('display');
   	}
+
+    function OnQuery(e)
+    {
+      socket.emit('call client',{ op:e.target.value , cu: socket.user });
+    }
+
+
+    function divClicked(num)
+    {
+      if(b == true)
+        {
+        if(t == 0 && socket.user == p1)
+        {
+            if(painted[num-1] == true)
+              alert("space already occupied");
+            else
+              socket.emit('divclicked', num, t, p1, p2);            
+        }
+        else if(t == 1 && socket.user == p2)
+        {
+          if(painted[num-1] == true)
+              alert("space already occupied");
+          else         
+              socket.emit('divclicked', num, t, p1, p2);                      
+        }
+        else
+          alert("Its not your turn");
+        // socket.emit('specify', whoseturn, socket.user);
+        }
+      else
+          socket.emit("GameOver");
+      return false;
+    }
+
+    function link()
+      {
+        location.reload();
+      }
+
+    function back()
+      {
+        b = true;
+         for(var l = 0; l <= 8; l++)
+        {
+          painted[l] = false;
+          content[l]='';
+          document.getElementById("div"+ (l+1)).innerText = "";
+          document.getElementById("div"+ (l+1)).style.backgroundColor = "white";
+        }
+        document.getElementById('game').style.visibility="hidden";
+        document.getElementById('you').style.visibility="hidden";
+        document.getElementById('opponent').style.visibility="hidden";
+        document.getElementById('winnerorloser').style.visibility="hidden";
+        socket.emit('updateuser', socket.user);
+      }
+
+    function checkForWinners(symbol)
+      {
+      for(var a = 0; a < winningCombinations.length; a++)
+        {
+        if(content[winningCombinations[a][0]]==symbol && content[winningCombinations[a][1]]== symbol && content[winningCombinations[a][2]]==symbol)
+          {
+              document.getElementById("div" + (winningCombinations[a][0] + 1)).style.backgroundColor = "green";
+              document.getElementById("div" + (winningCombinations[a][1] + 1)).style.backgroundColor = "green";
+              document.getElementById("div" + (winningCombinations[a][2] + 1)).style.backgroundColor = "green";
+            if(symbol == 'X')
+            {
+            socket.emit('won', p1, p2);
+            }
+            else
+            socket.emit('won', p2, p1);
+          }
+        }
+      }
+
   	socket.on('lista', function(list,users){ 
   		var searchBtn = document.createElement("input");
   		searchBtn.setAttribute("type","button");
@@ -81,45 +155,7 @@
         }
       }
   	});
-  	function OnQuery(e)
-  	{
-  		socket.emit('call client',{ op:e.target.value , cu: socket.user });
-  	}
-    function divClicked(num)
-    {
-      if(b == true)
-      {
-      if(t == 0 && socket.user == p1)
-      {
-        if(painted[num-1] == true)
-          {
-            alert("space already occupied");
-          }
-          else
-          {
-            socket.emit('divclicked', num, t, p1, p2);            
-          }
-      }
-      else if(t == 1 && socket.user == p2)
-      {
-        if(painted[num-1] == true)
-          {
-            alert("space already occupied");
-          }
-          else
-          {
-            socket.emit('divclicked', num, t, p1, p2);            
-          }
-      }
-      else
-        alert("Its not your turn");
-      }
-      else
-      {
-        socket.emit("GameOver");
-      }
-      return false;
-    }
+
   	socket.on('to socket', function(name){
   		var c = confirm(name + "wants to challenge you");
   		if(c == true)
@@ -129,18 +165,21 @@
         p2 = socket.user;
   		}
   	});
+
   	socket.on('confirm',function(name2,name1){
   		alert(name2 + " " + "has accepted your challenge");
       p1 = name1;
       p2 = name2;
       socket.emit('disable buttons', name1, name2);
   	});
+
     socket.on('disable',function(a, b){;
       if(document.getElementById(a) != null)
       document.getElementById(a).disabled= document.getElementById(a) || true;
       if(document.getElementById(b) != null)      
       document.getElementById(b).disabled= document.getElementById(b) || true;
     });
+
     socket.on('play',function(details){
     document.getElementById('game').style.visibility="visible";
     for (var ke in details)
@@ -150,21 +189,19 @@
       }
     document.getElementById('seee').style.visibility="hidden";
     if(socket.user == p1)
-    {
-        document.getElementById('opponent').innerHTML=p2;
-    }
+          document.getElementById('opponent').innerHTML=p2;
     else
-    {
-      document.getElementById('opponent').innerHTML=p1;
-    }
+        document.getElementById('opponent').innerHTML=p1;
+      
     document.getElementById('you').style.visibility="visible";
     document.getElementById('opponent').style.visibility="visible";
     });
+
     socket.on('divputsymbol', function(num, s){
       t = s;
       if(b == true)
       {
-        if(painted[num-1] ==false)
+        if(painted[num-1] == false)
       {
         if(turn % 2 == 0)
         {
@@ -183,29 +220,32 @@
       painted[num-1] = true;
       console.log(painted[num-1]);
       checkForWinners(content[num-1]);
-
       }
       else
         socket.emit("GameOver");
-
     });
+
     socket.on('win',function(){
       document.getElementById('winnerorloser').innerHTML= "You Have won";
       document.getElementById('winnerorloser').style.visibility="visible";
       b = false; 
     });
+
     socket.on('lose',function(){;
       document.getElementById('winnerorloser').innerHTML= "You Have lost :(";
       document.getElementById('winnerorloser').style.visibility="visible";
       b = false; 
     });
+
     socket.on('reload',function(){
       location.reload();
     });
+
     socket.on('update',function(k){
       if(document.getElementById(k) != null)
         document.getElementById(k).remove();
     });
+
     socket.on('checkforothers', function(details, users){
       console.log(details);
       console.log(users);
@@ -227,82 +267,36 @@
         }
       }
     });
+
     socket.on('alertgo', function(){
       alert("Game Over!");
     });
+
     socket.on("updatebuttons", function(users, uname, details){
-      // console.log(uname);
-      // console.log(document.getElementById(uname).disabled);
-      // alert("aisb");
       for (var k in details)
       {
         if (users[k].connected == false && k != socket.user)
           document.getElementById(k).disabled = false;
       }
-      // console.log(users);
         if (users[socket.user].connected == false )
         {
-          // alert("hey");
-          // alert(uname);
-            // if (document.getElementById(uname) != null && document.getElementById(uname).disabled == true)
-            //   document.getElementById(uname).disabled = false;
-            
-            document.getElementById('seee').style.visibility="visible";
+          document.getElementById('seee').style.visibility="visible";
           for (var ke in details)
           {
             if (document.getElementById(ke) != null)
             document.getElementById(ke).style.visibility = "visible";
           }
         } 
-        // document.getElementById('seee').style.visibility="visible";
-        // for (var ke in details)
-        // {
-        //   if (document.getElementById(ke) != null)
-        //   document.getElementById(ke).style.visibility = "visible";
-        // }
     });
+
     socket.on('sample', function(){
       alert("hi");
     });
-     function checkForWinners(symbol)
-      {
-      for(var a = 0; a < winningCombinations.length; a++)
-        {
-        if(content[winningCombinations[a][0]]==symbol && content[winningCombinations[a][1]]== symbol && content[winningCombinations[a][2]]==symbol)
-          {
-              document.getElementById("div" + (winningCombinations[a][0] + 1)).style.backgroundColor = "green";
-              document.getElementById("div" + (winningCombinations[a][1] + 1)).style.backgroundColor = "green";
-              document.getElementById("div" + (winningCombinations[a][2] + 1)).style.backgroundColor = "green";
-            if(symbol == 'X')
-            {
-            socket.emit('won', p1, p2);
-            }
-            else
-            socket.emit('won', p2, p1);
-          }
-        }
-      }
-      function link()
-      {
-        location.reload();
-      }
-      function back()
-      {
-        b = true;
-         for(var l = 0; l <= 8; l++)
-        {
-          painted[l] = false;
-          content[l]='';
-          document.getElementById("div"+ (l+1)).innerText = "";
-          document.getElementById("div"+ (l+1)).style.backgroundColor = "white";
-        }
-        document.getElementById('game').style.visibility="hidden";
-        document.getElementById('you').style.visibility="hidden";
-        document.getElementById('opponent').style.visibility="hidden";
-        document.getElementById('winnerorloser').style.visibility="hidden";
-        socket.emit('updateuser', socket.user);
-      }
+
  	</script>
+
+
+
  	<ul id="messages"></ul>
     	<form id = "kk" action="">
         <h1 align="center">Tic Tac Toe!</h1>
@@ -324,12 +318,38 @@
     </div>
     <span class="result"><h3 id="winnerorloser" align="center"></h3>
     </span>
+    <!-- <center><label id = "whosturn"></label></center> -->
     <a href = "javascript:link()"><center>Click to Disconnect</center></a>
     <a href="javascript:back()"><center>Click to return Home</center></a>
     <h3 id="seee">Click on the username to challenge with them</h3>
-    <!-- <div class="listda">
-      <span id = "aaa"></span>
-        <ol id="demo"></ol>
-     </div> -->
  </body>
  </html>
+
+
+<!-- class {
+  
+winningCombinations = null;
+init : function(){
+  
+}
+bind: function(){
+  
+}
+divClicked : function(er){
+  
+
+}
+Clicked : function(){
+  
+  this.divClicked(er);
+  this.winningCombinations = "user2"
+}
+
+var c = new class();
+  c.init();
+}
+class="abc"  data-box="1" -->
+
+
+
+

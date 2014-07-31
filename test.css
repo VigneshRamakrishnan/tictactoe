@@ -5,6 +5,7 @@ div
     height:300px;
     outline:1px solid;
     margin: auto;
+    float: left;
 }
 
 div div
